@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const { IncomingWebhook } = require('@slack/webhook');
 require('dotenv/config.js');
 
-const headless = process.env.NODE_ENV === 'development' ? { headless: false } : undefined;
+const headless = process.env.NODE_ENV === 'development' ? { headless: false } : { args: ['--no-sandbox'] };
 
 const months = {
     sty: 'January',
