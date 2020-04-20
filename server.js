@@ -1,8 +1,32 @@
 /* eslint-disable no-continue */
 const puppeteer = require('puppeteer');
+const { IncomingWebhook } = require('@slack/webhook');
 require('dotenv/config.js');
 
 const headless = process.env.NODE_ENV === 'development' ? { headless: false } : undefined;
+
+const months = {
+    sty: 'January',
+    lut: 'February',
+    mar: 'March',
+    kwi: 'April',
+    maj: 'May',
+    cze: 'June',
+    lip: 'July',
+    sie: 'August',
+    wrz: 'September',
+    paz: 'October',
+    lis: 'November',
+    gru: 'December',
+};
+const minutes = 1000 * 60;
+const hours = minutes * 60;
+const days = hours * 24;
+
+const deliveryWithinDays = 7;
+
+const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+const slack = new IncomingWebhook(webhookUrl);
 
 (async () => {
     const browser = await puppeteer.launch(headless);
@@ -68,10 +92,25 @@ const headless = process.env.NODE_ENV === 'development' ? { headless: false } : 
     }
     console.log(deliveryDate);
 
-    // TODO: Logic for assessing interesting delivery date and looping if it is not interesting
+    // Calculate delivery Epoch
+    let deliveryDay = deliveryDate.split(' ')[0];
+    deliveryDay = deliveryDay.length === 1 ? `0${deliveryDay}` : deliveryDay;
+    let deliveryMonth = deliveryDate.split(' ')[1];
+    deliveryMonth = months[deliveryMonth];
+    const deliveryEpoch = Date.parse(`${deliveryMonth} ${deliveryDay}, 2020`);
+
+    // Calculate number of days till delivery date
+    const deliveryDaysLeft = Math.round((deliveryEpoch - Date.now()) / days);
+
+    // if delivery date not within next week, finish
+    if (deliveryDaysLeft > deliveryWithinDays) {
+        console.log(`${deliveryDaysLeft} days till nearest available delivery date`);
+        await browser.close();
+        return false;
+    }
 
     // Open reservation panel
-    for (let i = 0; i < 10; i += 1) {
+    for (let i = 0; i < 3; i += 1) {
         await page.click('div.date');
         await page.waitFor(i * 1000);
         try {
@@ -92,15 +131,40 @@ const headless = process.env.NODE_ENV === 'development' ? { headless: false } : 
     await page.click('.reservation-selector_tabs-content > .button');
 
     // Get all available hours
-    await page.waitForSelector('span.available');
+    await page.waitFor(1000);
     const deliveryHours = await page.$$eval('span.available > .hours', (timeslots) =>
         timeslots.map((timeframe) => timeframe.textContent)
     );
     console.log(deliveryHours);
 
-    console.log('End');
+    await slack.send({
+        blocks: [
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `:truck: * <https://www.frisco.pl|Frisco> delivery available on ${deliveryDay} ${deliveryMonth}*`,
+                },
+            },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `:clock9: ${deliveryHours.length} timeframes to choose from:`,
+                },
+            },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `${deliveryHours.join('\t|\t')}`,
+                },
+            },
+        ],
+    });
 
-    // await browser.close();
+    console.log('Scrape End');
+
+    await browser.close();
+    return true;
 })();
-
-// TODO: Slack integration
