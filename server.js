@@ -94,19 +94,27 @@ const slack = new IncomingWebhook(webhookUrl);
 
     // Calculate delivery Epoch
     let deliveryDay = deliveryDate.split(' ')[0];
-    deliveryDay = deliveryDay.length === 1 ? `0${deliveryDay}` : deliveryDay;
     let deliveryMonth = deliveryDate.split(' ')[1];
-    deliveryMonth = months[deliveryMonth];
-    const deliveryEpoch = Date.parse(`${deliveryMonth} ${deliveryDay}, 2020`);
+    let deliveryDaysLeft = 0;
 
-    // Calculate number of days till delivery date
-    const deliveryDaysLeft = Math.round((deliveryEpoch - Date.now()) / days);
+    // Check if delivery date is tomorrow
+    if (deliveryDay.includes('jutro')) {
+        deliveryMonth = '';
+        deliveryDaysLeft = 1;
+    } else {
+        deliveryDay = deliveryDay.length === 1 ? `0${deliveryDay}` : deliveryDay;
+        deliveryMonth = months[deliveryMonth];
 
-    // if delivery date not within next week, finish
-    if (deliveryDaysLeft > deliveryWithinDays) {
-        console.log(`${deliveryDaysLeft} days till nearest available delivery date`);
-        await browser.close();
-        return false;
+        // Calculate number of days till delivery date
+        const deliveryEpoch = Date.parse(`${deliveryMonth} ${deliveryDay}, 2020`);
+        deliveryDaysLeft = Math.round((deliveryEpoch - Date.now()) / days);
+
+        // if delivery date not within next week, finish
+        if (deliveryDaysLeft > deliveryWithinDays) {
+            console.log(`${deliveryDaysLeft} days till nearest available delivery date`);
+            await browser.close();
+            return false;
+        }
     }
 
     // Open reservation panel
