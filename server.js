@@ -25,7 +25,7 @@ const minutes = 1000 * 60;
 const hours = minutes * 60;
 const days = hours * 24;
 
-const deliveryWithinDays = 70;
+const deliveryWithinDays = 7;
 
 const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 const slack = new IncomingWebhook(webhookUrl);
@@ -181,51 +181,47 @@ const slack = new IncomingWebhook(webhookUrl);
         ],
     });
 
-    axios
-        .post(process.env.GOOGLE_CHAT_WEBHOOK_URL, {
-            cards: [
-                {
-                    header: {
-                        title: `Frisco delivery available on ${deliveryDay} ${deliveryMonth}`,
-                        subtitle: `${deliveryHours.length} timeframes to choose from`,
-                    },
-                    sections: [
-                        {
-                            widgets: [
-                                {
-                                    keyValue: {
-                                        icon: 'clock',
-                                        topLabel: 'Available timeframes',
-                                        content: `${deliveryHours.join('\n')}`,
-                                    },
+    await axios.post(process.env.GOOGLE_CHAT_WEBHOOK_URL, {
+        cards: [
+            {
+                header: {
+                    title: `Frisco delivery available on ${deliveryDay} ${deliveryMonth}`,
+                    subtitle: `${deliveryHours.length} timeframes to choose from`,
+                },
+                sections: [
+                    {
+                        widgets: [
+                            {
+                                keyValue: {
+                                    icon: 'clock',
+                                    topLabel: 'Available timeframes',
+                                    content: `${deliveryHours.join('\n')}`,
                                 },
-                            ],
-                        },
-                        {
-                            widgets: [
-                                {
-                                    buttons: [
-                                        {
-                                            textButton: {
-                                                text: 'Go to Frisco',
-                                                onClick: {
-                                                    openLink: {
-                                                        url: 'https://www.frisco.pl',
-                                                    },
+                            },
+                        ],
+                    },
+                    {
+                        widgets: [
+                            {
+                                buttons: [
+                                    {
+                                        textButton: {
+                                            text: 'Go to Frisco',
+                                            onClick: {
+                                                openLink: {
+                                                    url: 'https://www.frisco.pl',
                                                 },
                                             },
                                         },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    });
 
     console.log('Scrape End');
 
