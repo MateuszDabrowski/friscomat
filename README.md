@@ -24,5 +24,5 @@ The script can be automated using free Heroku account.
 To host the script on Heroku, you will need to:
 
 1. Add content of the .env file as Config Vars (replace NODE_ENV value to production)
-2. Add Puppeteer buildpack to Heroku ([https://github.com/jontewks/puppeteer-heroku-buildpack](https://github.com/jontewks/puppeteer-heroku-buildpack))
-3. Add Heroku Sheduler Add-on and configure it ([<https://devcenter.heroku.com/articles/scheduler](Heroku> DevCenter User Guide))
+2. Add Puppeteer buildpack to Heroku (`https://github.com/jontewks/puppeteer-heroku-buildpack`)
+3. Add Heroku Sheduler Add-on and configure it ([Heroku DevCenter User Guide](https://devcenter.heroku.com/articles/scheduler))
