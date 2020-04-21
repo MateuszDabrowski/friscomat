@@ -85,12 +85,17 @@ const slack = new IncomingWebhook(webhookUrl);
         await page.waitFor(i * 1000);
         try {
             deliveryDate = await page.$eval('div.date', (element) => element.textContent);
-            if (deliveryDate) {
+            if (deliveryDate.match(/\w/)) {
                 break;
             }
         } catch (error) {
             continue;
         }
+    }
+    if (!deliveryDate.match(/\w/)) {
+        console.log(`deliveryDate value: ${deliveryDate}`);
+        await browser.close();
+        return false;
     }
     console.log(deliveryDate);
 
