@@ -1,9 +1,11 @@
 /* eslint-disable no-continue */
+const axios = require('axios');
 const puppeteer = require('puppeteer');
 const { IncomingWebhook } = require('@slack/webhook');
 require('dotenv/config.js');
 
-const headless = process.env.NODE_ENV === 'development' ? { headless: false } : { args: ['--no-sandbox'] };
+const headless =
+    process.env.NODE_ENV === 'development' ? { headless: false, slowMo: 20 } : { args: ['--no-sandbox'], slowMo: 20 };
 
 const months = {
     sty: 'January',
@@ -23,7 +25,7 @@ const minutes = 1000 * 60;
 const hours = minutes * 60;
 const days = hours * 24;
 
-const deliveryWithinDays = 7;
+const deliveryWithinDays = 70;
 
 const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 const slack = new IncomingWebhook(webhookUrl);
@@ -140,10 +142,17 @@ const slack = new IncomingWebhook(webhookUrl);
     await page.click('.reservation-selector_tabs-content > .button');
 
     // Get all available hours
-    await page.waitFor(1000);
-    const deliveryHours = await page.$$eval('span.available > .hours', (timeslots) =>
-        timeslots.map((timeframe) => timeframe.textContent)
-    );
+    let deliveryHours = [];
+    for (let i = 0; i < 3; i += 1) {
+        await page.waitFor(i * 1000);
+        try {
+            deliveryHours = await page.$$eval('span.available > .hours', (timeslots) =>
+                timeslots.map((timeframe) => timeframe.textContent)
+            );
+        } catch (error) {
+            continue;
+        }
+    }
     console.log(deliveryHours);
 
     await slack.send({
@@ -171,6 +180,53 @@ const slack = new IncomingWebhook(webhookUrl);
             },
         ],
     });
+
+    axios
+        .post(process.env.GOOGLE_CHAT_WEBHOOK_URL, {
+            cards: [
+                {
+                    header: {
+                        title: `Frisco delivery available on ${deliveryDay} ${deliveryMonth}`,
+                        subtitle: `${deliveryHours.length} timeframes to choose from`,
+                    },
+                    sections: [
+                        {
+                            widgets: [
+                                {
+                                    keyValue: {
+                                        icon: 'clock',
+                                        topLabel: 'Available timeframes',
+                                        content: `${deliveryHours.join('\n')}`,
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            widgets: [
+                                {
+                                    buttons: [
+                                        {
+                                            textButton: {
+                                                text: 'Go to Frisco',
+                                                onClick: {
+                                                    openLink: {
+                                                        url: 'https://www.frisco.pl',
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
     console.log('Scrape End');
 
     await browser.close();
