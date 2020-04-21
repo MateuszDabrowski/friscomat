@@ -98,7 +98,8 @@ const slack = new IncomingWebhook(webhookUrl);
     let deliveryDaysLeft = 0;
 
     // Check if delivery date is tomorrow
-    if (deliveryDay.includes('jutro')) {
+    if (deliveryDate.includes('jutro')) {
+        deliveryDay = 'tomorrow!';
         deliveryMonth = '';
         deliveryDaysLeft = 1;
     } else {
@@ -151,7 +152,7 @@ const slack = new IncomingWebhook(webhookUrl);
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: `:truck: * <https://www.frisco.pl|Frisco> delivery available on ${deliveryDay} ${deliveryMonth}*`,
+                    text: `:truck: *<https://www.frisco.pl|Frisco> delivery available: ${deliveryDay} ${deliveryMonth}*`,
                 },
             },
             {
@@ -170,7 +171,6 @@ const slack = new IncomingWebhook(webhookUrl);
             },
         ],
     });
-
     console.log('Scrape End');
 
     await browser.close();
