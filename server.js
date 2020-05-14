@@ -143,8 +143,12 @@ const slack = new IncomingWebhook(webhookUrl);
     }
 
     // Create new reservation
-    await page.waitForSelector('.reservation-selector_tabs-content');
-    await page.click('.reservation-selector_tabs-content > .button');
+    try {
+        await page.waitForSelector('.reservation-selector_tabs-content');
+        await page.click('.reservation-selector_tabs-content > .button');
+    } catch (error) {
+        console.log('Not able to create reservation');
+    }
 
     // Get all available hours
     let deliveryHours = [];
