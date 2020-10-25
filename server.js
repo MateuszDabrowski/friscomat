@@ -27,8 +27,6 @@ const days = hours * 24;
 
 const deliveryWithinDays = 7;
 
-const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-
 (async () => {
     const browser = await puppeteer.launch(headless);
     const context = await browser.createIncognitoBrowserContext();
