@@ -1,7 +1,6 @@
 /* eslint-disable no-continue */
 const axios = require('axios');
 const puppeteer = require('puppeteer');
-const { IncomingWebhook } = require('@slack/webhook');
 require('dotenv/config.js');
 
 const headless =
@@ -17,7 +16,7 @@ const months = {
     lip: 'July',
     sie: 'August',
     wrz: 'September',
-    paz: 'October',
+    paź: 'October',
     lis: 'November',
     gru: 'December',
 };
