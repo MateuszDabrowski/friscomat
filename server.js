@@ -71,7 +71,7 @@ const slack = new IncomingWebhook(webhookUrl);
             await page.click('input.login[type="submit"]');
 
             // Check if login was successful
-            await page.waitForSelector('.header_user-menu');
+            await page.waitForSelector('.header-user');
             if (!notLogged) {
                 break;
             }
