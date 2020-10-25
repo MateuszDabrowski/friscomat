@@ -28,7 +28,6 @@ const days = hours * 24;
 const deliveryWithinDays = 7;
 
 const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-const slack = new IncomingWebhook(webhookUrl);
 
 (async () => {
     const browser = await puppeteer.launch(headless);
@@ -163,32 +162,6 @@ const slack = new IncomingWebhook(webhookUrl);
         }
     }
     console.log(deliveryHours);
-
-    await slack.send({
-        blocks: [
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `:truck: *<https://www.frisco.pl|Frisco> delivery available: ${deliveryDay} ${deliveryMonth}*`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `:clock9: ${deliveryHours.length} timeframes to choose from:`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `${deliveryHours.join('\t|\t')}`,
-                },
-            },
-        ],
-    });
 
     await axios.post(process.env.GOOGLE_CHAT_WEBHOOK_URL, {
         cards: [
