@@ -64,7 +64,7 @@ const deliveryWithinDays = 7;
             }
 
             // Log in to Frisco
-            await page.click('input.login[type="submit"]');
+            await page.click('button.login[type="submit"]');
 
             // Check if login was successful
             await page.waitForSelector('.header-user');
