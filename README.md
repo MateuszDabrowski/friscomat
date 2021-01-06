@@ -12,7 +12,6 @@ Structure of the .env file
 NODE_ENV=development
 FRISCO_LOGIN=loginToFriscoShop
 FRISCO_PASSWORD=PasswordToFriscoShop
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/webhookUrlProvidedBySlackAPI
 GOOGLE_CHAT_WEBHOOK_URL=https://chat.googleapis.com/v1/spaces/webhookUrlProvidedByGoogleChatAPI
 ```
 
